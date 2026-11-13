@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import MobileFrame, { StatusBar } from './components/MobileFrame';
+import MobileFrame from './components/MobileFrame';
 import Splash from './components/Splash';
 import Onboarding from './components/Onboarding';
 import SignUp from './components/SignUp';
@@ -563,8 +563,7 @@ export default function App() {
 
           {screen === 'account' && (
             <div className="flex-1 w-full bg-white flex flex-col overflow-hidden">
-              <StatusBar variant="dark" />
-              <div className="px-6 pt-2 pb-3.5 border-b border-neutral-100">
+              <div className="px-6 pt-5 pb-3.5 border-b border-neutral-100">
                 <h1 className="text-[22px] font-bold text-[#8B2313]">
                   Account
                 </h1>

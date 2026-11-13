@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StatusBar, HomeIndicator } from './MobileFrame';
+import { HomeIndicator } from './MobileFrame';
 import FormInput, { GoogleAuthButton } from './FormInput';
 import { registerUser, API_BASE_URL } from '../services/api';
 
@@ -94,9 +94,7 @@ export default function SignUp({ onSuccess, onGoToLogin }) {
   return (
     <div className="flex-1 w-full bg-white flex flex-col justify-between overflow-y-auto no-scrollbar">
       <div>
-        <StatusBar variant="dark" />
-
-        <div className="px-6 pt-4 pb-6">
+        <div className="px-6 pt-6 pb-6">
           {/* Header */}
           <h1 className="text-[32px] font-bold text-[#1A1A1A] tracking-[-0.03em] leading-tight">
             Create an account

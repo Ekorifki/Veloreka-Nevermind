@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StatusBar, HomeIndicator } from './MobileFrame';
+import { HomeIndicator } from './MobileFrame';
 import FormInput, { GoogleAuthButton } from './FormInput';
 import { loginUser, setAuthSession, API_BASE_URL } from '../services/api';
 
@@ -131,11 +131,7 @@ export default function Login({
   const loginContent = (
     <div className="flex-1 w-full bg-white flex flex-col justify-between overflow-y-auto no-scrollbar">
       <div>
-        <div className={isStandalone ? 'md:hidden' : ''}>
-          <StatusBar variant="dark" />
-        </div>
-
-        <div className="px-6 pt-4 pb-6 md:px-2 md:pt-2">
+        <div className="px-6 pt-6 pb-6 md:px-2 md:pt-2">
           <div className="hidden md:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold mb-3">
             <span>NEVERMIND // VELOREKA ACCESS</span>
           </div>

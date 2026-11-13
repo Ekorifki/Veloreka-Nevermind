@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Bell, Search, Mic, XCircle, X } from 'lucide-react';
-import { StatusBar } from './MobileFrame';
 import { INITIAL_RECENT_SEARCHES } from '../data/products';
 import ProductCard, { staggerContainerVariants } from './ProductCard';
 import { ProductGridSkeleton } from './Skeletons';
@@ -60,10 +59,8 @@ export default function SearchScreen({
 
   return (
     <div className="flex-1 w-full bg-white flex flex-col overflow-hidden">
-      <StatusBar variant="dark" />
-
       {/* Top Header */}
-      <div className="px-6 pt-2 pb-3 flex items-center justify-between">
+      <div className="px-6 pt-5 pb-3 flex items-center justify-between">
         <button
           type="button"
           aria-label="Back"

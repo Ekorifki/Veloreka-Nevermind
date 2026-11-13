@@ -9,7 +9,7 @@ import {
   Tag,
   Check,
 } from 'lucide-react';
-import { StatusBar, HomeIndicator } from './MobileFrame';
+import { HomeIndicator } from './MobileFrame';
 import { SHIPPING_FEE, formatSummaryCurrency } from './CartScreen';
 import { checkoutOrderApi } from '../services/api';
 
@@ -98,10 +98,8 @@ export default function CheckoutScreen({
     <div className="flex-1 w-full bg-white flex flex-col justify-between overflow-hidden relative">
       {/* Scrollable Checkout Body */}
       <div className="flex-1 overflow-y-auto no-scrollbar">
-        <StatusBar variant="dark" />
-
         {/* Header */}
-        <div className="px-6 pt-2 pb-3.5 flex items-center justify-between border-b border-neutral-100">
+        <div className="px-6 pt-5 pb-3.5 flex items-center justify-between border-b border-neutral-100">
           <button
             type="button"
             aria-label="Back"

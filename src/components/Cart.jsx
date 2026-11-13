@@ -8,7 +8,6 @@ import {
   ArrowRight,
   Trash2,
 } from 'lucide-react';
-import { StatusBar } from './MobileFrame';
 import { formatPrice } from './ProductCard';
 import { API_BASE_URL, getAuthToken, normalizeCartItem } from '../services/api';
 
@@ -166,10 +165,8 @@ export default function Cart({
 
   return (
     <div className="flex-1 w-full bg-white flex flex-col overflow-hidden">
-      <StatusBar variant="dark" />
-
       {/* Top Header */}
-      <div className="px-6 pt-2 pb-3.5 flex items-center justify-between border-b border-neutral-100">
+      <div className="px-6 pt-5 pb-3.5 flex items-center justify-between border-b border-neutral-100">
         <button
           type="button"
           aria-label="Back"

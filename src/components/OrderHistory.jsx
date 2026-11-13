@@ -9,7 +9,6 @@ import {
   ShoppingBag,
   Sparkles,
 } from 'lucide-react';
-import { StatusBar } from './MobileFrame';
 import { API_BASE_URL, getAuthToken } from '../services/api';
 
 function formatCurrency(value) {
@@ -100,9 +99,7 @@ export default function OrderHistory({
 
   return (
     <div className="flex-1 w-full bg-[#0B0B0E] text-zinc-100 flex flex-col overflow-hidden">
-      <StatusBar variant="light" />
-
-      <div className="px-6 pt-2 pb-3.5 flex items-center justify-between border-b border-zinc-800 bg-[#0B0B0E]/95 backdrop-blur">
+      <div className="px-6 pt-5 pb-3.5 flex items-center justify-between border-b border-zinc-800 bg-[#0B0B0E]/95 backdrop-blur">
         <button
           type="button"
           aria-label="Back"

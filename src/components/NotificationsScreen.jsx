@@ -8,7 +8,6 @@ import {
   ShieldAlert,
   Trash2,
 } from 'lucide-react';
-import { StatusBar } from './MobileFrame';
 
 const listContainerVariants = {
   hidden: { opacity: 0 },
@@ -106,10 +105,8 @@ export default function NotificationsScreen({
 
   return (
     <div className="flex-1 w-full bg-white flex flex-col overflow-hidden">
-      <StatusBar variant="dark" />
-
       {/* Top Header matching Product Details / My Cart */}
-      <div className="px-6 pt-2 pb-3.5 flex items-center justify-between border-b border-neutral-100">
+      <div className="px-6 pt-5 pb-3.5 flex items-center justify-between border-b border-neutral-100">
         <button
           type="button"
           aria-label="Back"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Bell, MapPin, Plus } from 'lucide-react';
-import { StatusBar, HomeIndicator } from './MobileFrame';
+import { HomeIndicator } from './MobileFrame';
 
 export default function AddressScreen({
   addresses,
@@ -27,10 +27,8 @@ export default function AddressScreen({
   return (
     <div className="flex-1 w-full bg-white flex flex-col justify-between overflow-hidden">
       <div className="flex-1 overflow-y-auto no-scrollbar">
-        <StatusBar variant="dark" />
-
         {/* Header */}
-        <div className="px-6 pt-2 pb-3.5 flex items-center justify-between border-b border-neutral-100">
+        <div className="px-6 pt-5 pb-3.5 flex items-center justify-between border-b border-neutral-100">
           <button
             type="button"
             aria-label="Back"

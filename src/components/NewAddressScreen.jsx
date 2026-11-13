@@ -7,7 +7,7 @@ import {
   Check,
   AlertCircle,
 } from 'lucide-react';
-import { StatusBar, HomeIndicator } from './MobileFrame';
+import { HomeIndicator } from './MobileFrame';
 import { ADDRESS_NICKNAME_OPTIONS } from '../data/addresses';
 
 export default function NewAddressScreen({ onAddAddress, onBack }) {
@@ -70,9 +70,7 @@ export default function NewAddressScreen({ onAddAddress, onBack }) {
     <div className="flex-1 w-full bg-white flex flex-col justify-between overflow-hidden relative">
       {/* Top Bar */}
       <div>
-        <StatusBar variant="dark" />
-
-        <div className="px-6 pt-2 pb-3 flex items-center justify-between">
+        <div className="px-6 pt-5 pb-3 flex items-center justify-between">
           <button
             type="button"
             aria-label="Back"

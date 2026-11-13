@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StatusBar, HomeIndicator } from './MobileFrame';
+import { HomeIndicator } from './MobileFrame';
 
 export default function Splash({ onFinish }) {
   useEffect(() => {
@@ -16,10 +16,8 @@ export default function Splash({ onFinish }) {
       tabIndex={0}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onFinish?.()}
       title="Click or wait to continue to Onboarding"
-      className="flex-1 w-full bg-[#1A1A1A] flex flex-col justify-between items-center cursor-pointer select-none relative overflow-hidden"
+      className="flex-1 w-full bg-[#1A1A1A] pt-6 flex flex-col justify-between items-center cursor-pointer select-none relative overflow-hidden"
     >
-      <StatusBar variant="light" />
-
       {/* Center Brand Logo (NEVERMIND) */}
       <div className="flex-1 flex items-center justify-center px-10 w-full">
         <img

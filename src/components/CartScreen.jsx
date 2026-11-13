@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Bell, Plus, Minus, ArrowRight, Trash2 } from 'lucide-react';
-import { StatusBar } from './MobileFrame';
 import { formatPrice } from './ProductCard';
 
 export const SHIPPING_FEE = 80;
@@ -40,10 +39,8 @@ export default function CartScreen({
 
   return (
     <div className="flex-1 w-full bg-white flex flex-col overflow-hidden">
-      <StatusBar variant="dark" />
-
       {/* Top Header */}
-      <div className="px-6 pt-2 pb-3.5 flex items-center justify-between border-b border-neutral-100">
+      <div className="px-6 pt-5 pb-3.5 flex items-center justify-between border-b border-neutral-100">
         <button
           type="button"
           aria-label="Back"

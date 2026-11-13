@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, Bell, Heart, Star, ShoppingBag, Check } from 'lucide-react';
-import { StatusBar } from './MobileFrame';
 import { ProductDetailsSkeleton } from './Skeletons';
 
 export default function ProductDetails({
@@ -46,10 +45,8 @@ export default function ProductDetails({
     <div className="flex-1 w-full bg-white flex flex-col justify-between overflow-hidden">
       {/* Scrollable Upper Content */}
       <div className="flex-1 overflow-y-auto no-scrollbar">
-        <StatusBar variant="dark" />
-
         {/* Header */}
-        <div className="px-6 pt-2 pb-2 flex items-center justify-between">
+        <div className="px-6 pt-5 pb-2 flex items-center justify-between">
           <button
             type="button"
             aria-label="Back"
