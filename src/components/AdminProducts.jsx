@@ -8,10 +8,14 @@ import {
   Check,
   Package,
 } from 'lucide-react';
+import {
+  API_BASE_URL,
+  fetchAdminProductsApi,
+  createAdminProductApi,
+  updateAdminProductApi,
+  deleteAdminProductApi,
+} from '../services/api';
 import { ensureAdminAuthToken } from '../utils/api';
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const INITIAL_FORM = {
   name: '',
@@ -39,30 +43,13 @@ export default function AdminProducts({ onProductsChanged }) {
 
     try {
       await ensureAdminAuthToken();
-
-      console.log('Fetching to:', API_BASE_URL);
-      const response = await fetch(`${API_BASE_URL}/admin/products`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(
-          result.message ||
-            `Gagal memuat katalog produk (HTTP ${response.status})`
-        );
-      }
+      const result = await fetchAdminProductsApi();
       setProducts(Array.isArray(result.data) ? result.data : []);
     } catch (error) {
       console.error('AdminProducts fetch error:', error);
       setErrorMessage(
         error.message ||
-          `Gagal terhubung ke server API (${API_BASE_URL}). Pastikan server Laravel aktif.`
+          `Gagal terhubung ke server API (${API_BASE_URL}/admin/products).`
       );
     } finally {
       setIsLoading(false);
@@ -113,26 +100,9 @@ export default function AdminProducts({ onProductsChanged }) {
     try {
       await ensureAdminAuthToken();
 
-      const url = editingId
-        ? `${API_BASE_URL}/admin/products/${editingId}`
-        : `${API_BASE_URL}/admin/products`;
-      const method = editingId ? 'PUT' : 'POST';
-
-      console.log('Fetching to:', API_BASE_URL);
-      const response = await fetch(url, {
-        method,
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.message || 'Gagal menyimpan produk.');
-      }
+      const result = editingId
+        ? await updateAdminProductApi(editingId, payload)
+        : await createAdminProductApi(payload);
 
       if (editingId) {
         setProducts((prev) =>
@@ -158,23 +128,7 @@ export default function AdminProducts({ onProductsChanged }) {
 
     try {
       await ensureAdminAuthToken();
-
-      console.log('Fetching to:', API_BASE_URL);
-      const response = await fetch(
-        `${API_BASE_URL}/admin/products/${productId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.message || 'Gagal menghapus produk.');
-      }
+      await deleteAdminProductApi(productId);
       setProducts((prev) => prev.filter((item) => item.id !== productId));
       onProductsChanged?.();
     } catch (error) {

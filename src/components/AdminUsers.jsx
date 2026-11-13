@@ -8,10 +8,13 @@ import {
   Shield,
   Users,
 } from 'lucide-react';
+import {
+  API_BASE_URL,
+  fetchAdminUsersApi,
+  updateAdminUserApi,
+  deleteAdminUserApi,
+} from '../services/api';
 import { ensureAdminAuthToken } from '../utils/api';
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -32,29 +35,13 @@ export default function AdminUsers() {
 
     try {
       await ensureAdminAuthToken();
-
-      console.log('Fetching to:', API_BASE_URL);
-      const response = await fetch(`${API_BASE_URL}/admin/users`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(
-          result.message || `Gagal memuat pengguna (HTTP ${response.status})`
-        );
-      }
+      const result = await fetchAdminUsersApi();
       setUsers(Array.isArray(result.data) ? result.data : []);
     } catch (error) {
       console.error('AdminUsers fetch error:', error);
       setErrorMessage(
         error.message ||
-          `Gagal terhubung ke server API (${API_BASE_URL}). Pastikan server Laravel aktif.`
+          `Gagal terhubung ke server API (${API_BASE_URL}/admin/users).`
       );
     } finally {
       setIsLoading(false);
@@ -92,24 +79,7 @@ export default function AdminUsers() {
         ...(formData.password ? { password: formData.password } : {}),
       };
 
-      console.log('Fetching to:', API_BASE_URL);
-      const response = await fetch(
-        `${API_BASE_URL}/admin/users/${editingUser.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.message || 'Gagal memperbarui pengguna.');
-      }
+      const result = await updateAdminUserApi(editingUser.id, payload);
 
       setUsers((prev) =>
         prev.map((u) => (u.id === editingUser.id ? result.data : u))
@@ -128,20 +98,7 @@ export default function AdminUsers() {
 
     try {
       await ensureAdminAuthToken();
-
-      console.log('Fetching to:', API_BASE_URL);
-      const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.message || 'Gagal menghapus pengguna.');
-      }
+      await deleteAdminUserApi(userId);
       setUsers((prev) => prev.filter((u) => u.id !== userId));
     } catch (error) {
       console.error('AdminUsers delete error:', error);

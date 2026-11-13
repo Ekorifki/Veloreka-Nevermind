@@ -1,10 +1,26 @@
-export const API_BASE_URL =
+const rawBaseUrl =
   import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+export const API_BASE_URL = rawBaseUrl.trim().replace(/\/+$/, '');
 
 const TOKEN_STORAGE_KEY = 'token';
 const LEGACY_TOKEN_KEY = 'veloreka_token';
 const USER_STORAGE_KEY = 'veloreka_user';
 const ROLE_STORAGE_KEY = 'veloreka_role';
+
+export function buildApiUrl(endpoint = '') {
+  const cleanEndpoint = String(endpoint || '').trim();
+  if (!cleanEndpoint) {
+    return API_BASE_URL;
+  }
+  if (/^https?:\/\//i.test(cleanEndpoint)) {
+    return cleanEndpoint;
+  }
+  const normalizedPath = cleanEndpoint.startsWith('/')
+    ? cleanEndpoint
+    : `/${cleanEndpoint}`;
+  return `${API_BASE_URL}${normalizedPath}`;
+}
 
 export function getAuthToken() {
   try {
@@ -109,17 +125,25 @@ export function normalizeCartItem(raw) {
 }
 
 export async function apiRequest(endpoint, options = {}) {
-  const token = getAuthToken();
+  const token =
+    localStorage.getItem('token') ||
+    localStorage.getItem('veloreka_token') ||
+    '';
 
-  console.log('Fetching to:', API_BASE_URL);
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const targetUrl = buildApiUrl(endpoint);
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {}),
+  };
+
+  console.log('Fetching to:', targetUrl);
+
+  const response = await fetch(targetUrl, {
     ...options,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
+    headers,
   });
 
   const data = await response.json().catch(() => ({}));
@@ -134,6 +158,9 @@ export async function apiRequest(endpoint, options = {}) {
   return data;
 }
 
+// ==========================================
+// 1. PRODUCT ENDPOINTS (/products)
+// ==========================================
 export async function fetchProducts(params = {}) {
   const query = new URLSearchParams();
   if (params.category && params.category !== 'All Categories') {
@@ -157,6 +184,9 @@ export async function fetchProductById(id) {
   return normalizeProduct(result.data || result);
 }
 
+// ==========================================
+// 2. AUTHENTICATION ENDPOINTS (/register, /login, /logout)
+// ==========================================
 export async function registerUser({ name, email, password }) {
   const result = await apiRequest('/register', {
     method: 'POST',
@@ -187,6 +217,9 @@ export async function logoutUser() {
   }
 }
 
+// ==========================================
+// 3. CART ENDPOINTS (/cart)
+// ==========================================
 export async function fetchCartItems() {
   const result = await apiRequest('/cart', { method: 'GET' });
   const list = Array.isArray(result.data) ? result.data : [];
@@ -222,6 +255,9 @@ export async function clearCartApi() {
   });
 }
 
+// ==========================================
+// 4. USER CHECKOUT & ORDERS ENDPOINTS (/checkout, /orders)
+// ==========================================
 export async function checkoutOrderApi(payload) {
   return apiRequest('/checkout', {
     method: 'POST',
@@ -234,4 +270,71 @@ export async function fetchOrdersApi() {
     method: 'GET',
   });
   return Array.isArray(result.data) ? result.data : [];
+}
+
+// ==========================================
+// 5. ADMIN ENDPOINTS (/admin/dashboard, /admin/users, /admin/products, /admin/orders)
+// ==========================================
+export async function fetchAdminDashboardApi() {
+  return apiRequest('/admin/dashboard', {
+    method: 'GET',
+  });
+}
+
+export async function fetchAdminUsersApi() {
+  return apiRequest('/admin/users', {
+    method: 'GET',
+  });
+}
+
+export async function updateAdminUserApi(userId, payload) {
+  return apiRequest(`/admin/users/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteAdminUserApi(userId) {
+  return apiRequest(`/admin/users/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function fetchAdminProductsApi() {
+  return apiRequest('/admin/products', {
+    method: 'GET',
+  });
+}
+
+export async function createAdminProductApi(payload) {
+  return apiRequest('/admin/products', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateAdminProductApi(productId, payload) {
+  return apiRequest(`/admin/products/${productId}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteAdminProductApi(productId) {
+  return apiRequest(`/admin/products/${productId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function fetchAdminOrdersApi() {
+  return apiRequest('/admin/orders', {
+    method: 'GET',
+  });
+}
+
+export async function updateAdminOrderStatusApi(orderId, status) {
+  return apiRequest(`/admin/orders/${orderId}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
+  });
 }

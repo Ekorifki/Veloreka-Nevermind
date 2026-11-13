@@ -10,10 +10,12 @@ import {
   Check,
   ClipboardList,
 } from 'lucide-react';
+import {
+  API_BASE_URL,
+  fetchAdminOrdersApi,
+  updateAdminOrderStatusApi,
+} from '../services/api';
 import { ensureAdminAuthToken } from '../utils/api';
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const ORDER_STATUSES = [
   'Pending',
@@ -54,31 +56,14 @@ export default function AdminOrders() {
 
     try {
       await ensureAdminAuthToken();
-
-      console.log('Fetching to:', API_BASE_URL);
-      const response = await fetch(`${API_BASE_URL}/admin/orders`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(
-          result.message ||
-            `Gagal memuat daftar pesanan (HTTP ${response.status})`
-        );
-      }
+      const result = await fetchAdminOrdersApi();
       const list = Array.isArray(result.data) ? result.data : [];
       setOrders(list);
     } catch (error) {
       console.error('AdminOrders fetch error:', error);
       setErrorMessage(
         error.message ||
-          `Gagal terhubung ke server API (${API_BASE_URL}). Pastikan server Laravel aktif.`
+          `Gagal terhubung ke server API (${API_BASE_URL}/admin/orders).`
       );
     } finally {
       setIsLoading(false);
@@ -101,25 +86,10 @@ export default function AdminOrders() {
 
     try {
       await ensureAdminAuthToken();
-
-      console.log('Fetching to:', API_BASE_URL);
-      const response = await fetch(
-        `${API_BASE_URL}/admin/orders/${selectedOrder.id}/status`,
-        {
-          method: 'PUT',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify({ status: newStatus }),
-        }
+      const result = await updateAdminOrderStatusApi(
+        selectedOrder.id,
+        newStatus
       );
-
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.message || 'Gagal mengubah status pesanan.');
-      }
 
       const updatedOrder = result.data;
       setStatusValue(updatedOrder.status);

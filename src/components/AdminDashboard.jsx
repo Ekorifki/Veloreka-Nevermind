@@ -11,10 +11,14 @@ import {
   Sparkles,
   X,
 } from 'lucide-react';
+import {
+  API_BASE_URL,
+  fetchAdminDashboardApi,
+  fetchAdminUsersApi,
+  fetchAdminProductsApi,
+  fetchAdminOrdersApi,
+} from '../services/api';
 import { ensureAdminAuthToken } from '../utils/api';
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const MONTHLY_BAR_DATA = [
   { month: 'Jan', revenue: 62, target: 45 },
@@ -45,34 +49,46 @@ export default function AdminDashboard({ onNavigate }) {
     try {
       await ensureAdminAuthToken();
 
-      console.log('Fetching to:', API_BASE_URL);
-      const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(
-          result.message || `Gagal memuat data dasbor (HTTP ${response.status})`
+      try {
+        const result = await fetchAdminDashboardApi();
+        const s = result.stats || {};
+        setStats({
+          usersCount: Number(s.users_count ?? 0),
+          productsCount: Number(s.products_count ?? 0),
+          ordersCount: Number(s.orders_count ?? 0),
+          totalRevenue: Number(s.total_revenue ?? 0),
+        });
+        setTopProducts(
+          Array.isArray(result.top_products) ? result.top_products : []
         );
+      } catch {
+        const [usersData, productsData, ordersData] = await Promise.all([
+          fetchAdminUsersApi(),
+          fetchAdminProductsApi(),
+          fetchAdminOrdersApi(),
+        ]);
+
+        const usersList = Array.isArray(usersData.data) ? usersData.data : [];
+        const productsList = Array.isArray(productsData.data)
+          ? productsData.data
+          : [];
+        const ordersList = Array.isArray(ordersData.data)
+          ? ordersData.data
+          : [];
+
+        const revenue = ordersList.reduce(
+          (sum, order) => sum + Number(order.total_amount || 0),
+          0
+        );
+
+        setStats({
+          usersCount: usersList.length,
+          productsCount: productsList.length,
+          ordersCount: ordersList.length,
+          totalRevenue: revenue,
+        });
+        setTopProducts(productsList.slice(0, 4));
       }
-
-      const s = result.stats || {};
-      setStats({
-        usersCount: Number(s.users_count ?? 0),
-        productsCount: Number(s.products_count ?? 0),
-        ordersCount: Number(s.orders_count ?? 0),
-        totalRevenue: Number(s.total_revenue ?? 0),
-      });
-
-      setTopProducts(
-        Array.isArray(result.top_products) ? result.top_products : []
-      );
     } catch (error) {
       console.error('AdminDashboard fetch error:', error);
       setErrorMessage(
