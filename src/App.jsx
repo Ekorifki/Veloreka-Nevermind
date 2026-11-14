@@ -126,9 +126,13 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const navigateRoute = useCallback((nextPath) => {
+  const navigateRoute = useCallback((nextPath, { replace = false } = {}) => {
     if (window.location.pathname !== nextPath) {
-      window.history.pushState({}, '', nextPath);
+      if (replace) {
+        window.history.replaceState({}, '', nextPath);
+      } else {
+        window.history.pushState({}, '', nextPath);
+      }
     }
     setPathname(nextPath);
   }, []);
@@ -173,7 +177,7 @@ export default function App() {
 
   const navigateTo = (targetScreen) => {
     if (targetScreen === 'login') {
-      navigateRoute('/');
+      navigateRoute('/login');
       return;
     }
     if (pathname === '/') {
@@ -212,7 +216,7 @@ export default function App() {
     }
     setUser(null);
     setCartItems([]);
-    navigateRoute('/');
+    navigateRoute('/login');
     triggerToast({
       type: 'success',
       title: 'Logged Out',
@@ -329,7 +333,17 @@ export default function App() {
   // =========================================================
   // 1. UNIVERSAL SINGLE LOGIN ROUTE (/)
   // =========================================================
-  if (pathname === '/' || pathname === '/login') {
+  if (pathname === '/') {
+    return (
+      <div className="min-h-screen w-full bg-[#0a0a0a] md:bg-[#111113] flex items-center justify-center">
+        <div className="w-full max-w-md min-h-screen md:min-h-[844px] md:h-[844px] bg-[#0a0a0a] md:rounded-[40px] flex flex-col overflow-hidden">
+          <Splash navigate={navigateRoute} />
+        </div>
+      </div>
+    );
+  }
+
+  if (pathname === '/login') {
     return (
       <Login
         isStandalone
@@ -417,7 +431,7 @@ export default function App() {
           {screen === 'signup' && (
             <SignUp
               onSuccess={handleAuthSuccess}
-              onGoToLogin={() => navigateRoute('/')}
+              onGoToLogin={() => navigateRoute('/login')}
             />
           )}
 

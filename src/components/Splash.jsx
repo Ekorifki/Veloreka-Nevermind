@@ -1,22 +1,40 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { HomeIndicator } from './MobileFrame';
+import { getAuthToken, getStoredRole } from '../services/api';
 
-export default function Splash({ onFinish }) {
+export default function Splash({ onFinish, navigate }) {
+  const handleRedirect = useCallback(() => {
+    if (navigate) {
+      const token = getAuthToken();
+      if (token) {
+        const role = getStoredRole();
+        navigate(role === 'admin' ? '/admin' : '/home', { replace: true });
+      } else {
+        navigate('/login', { replace: true });
+      }
+      return;
+    }
+
+    if (onFinish) {
+      onFinish();
+    }
+  }, [navigate, onFinish]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (onFinish) onFinish();
-    }, 2400);
+      handleRedirect();
+    }, 2500);
     return () => clearTimeout(timer);
-  }, [onFinish]);
+  }, [handleRedirect]);
 
   return (
     <div
-      onClick={onFinish}
+      onClick={handleRedirect}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onFinish?.()}
-      title="Click or wait to continue to Onboarding"
-      className="flex-1 w-full bg-[#1A1A1A] pt-6 flex flex-col justify-between items-center cursor-pointer select-none relative overflow-hidden"
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleRedirect()}
+      title="Loading Veloreka Nevermind"
+      className="flex-1 w-full bg-[#0a0a0a] pt-6 flex flex-col justify-between items-center cursor-pointer select-none relative overflow-hidden"
     >
       {/* Center Brand Logo (NEVERMIND) */}
       <div className="flex-1 flex items-center justify-center px-10 w-full">
