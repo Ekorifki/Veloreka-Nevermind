@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { HomeIndicator } from './MobileFrame';
 import FormInput, { GoogleAuthButton } from './FormInput';
-import { registerUser, API_BASE_URL } from '../services/api';
+import { registerUser, setAuthSession, API_BASE_URL } from '../services/api';
+import { triggerGoogleSelectAccount } from '../utils/googleAuth';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -10,7 +12,9 @@ export default function SignUp({ onSuccess, onGoToLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [serverError, setServerError] = useState('');
+  const [googleError, setGoogleError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const [touched, setTouched] = useState({
     fullName: false,
@@ -81,10 +85,15 @@ export default function SignUp({ onSuccess, onGoToLogin }) {
         setServerError(emailErr || err.message || 'Registration failed');
       } else {
         // Fallback when testing UI offline before Laravel server is started
-        onSuccess?.({
+        const fallbackToken = `offline-token-${Date.now()}`;
+        const fallbackUser = {
           fullName: fullName.trim(),
           email: email.trim(),
-        });
+          role: 'user',
+          token: fallbackToken,
+        };
+        setAuthSession(fallbackToken, fallbackUser, 'user');
+        onSuccess?.(fallbackUser);
       }
     } finally {
       setIsSubmitting(false);
@@ -201,13 +210,47 @@ export default function SignUp({ onSuccess, onGoToLogin }) {
           {/* Google Sign Up */}
           <GoogleAuthButton
             label="Sign Up with Google"
-            onClick={() =>
-              onSuccess?.({
-                fullName: fullName.trim() || 'Veloreka',
-                email: email.trim() || 'VeloReka@example.com',
-              })
-            }
+            loading={isGoogleLoading}
+            disabled={isSubmitting}
+            loadingLabel="Opening Google Account Chooser..."
+            onClick={() => {
+              setServerError('');
+              setGoogleError('');
+              triggerGoogleSelectAccount({
+                onLoadingChange: setIsGoogleLoading,
+                onSuccess: (userData) => {
+                  if (!userData?.token) {
+                    setGoogleError(
+                      'Authentication failed: missing valid session token.'
+                    );
+                    return;
+                  }
+                  setAuthSession(
+                    userData.token,
+                    userData,
+                    userData.role || 'user'
+                  );
+                  onSuccess?.(userData);
+                },
+                onError: (message) => {
+                  setGoogleError(
+                    message ||
+                      'Google sign-up was cancelled or failed. Please select a Google account to continue.'
+                  );
+                },
+              });
+            }}
           />
+
+          {googleError && (
+            <div
+              role="alert"
+              className="mt-3 p-3 rounded-[10px] bg-red-50 border border-red-200 flex items-start gap-2.5 text-[#ED1010] text-[13px] leading-snug"
+            >
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span>{googleError}</span>
+            </div>
+          )}
         </div>
       </div>
 

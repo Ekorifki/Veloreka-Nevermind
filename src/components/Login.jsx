@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { HomeIndicator } from './MobileFrame';
 import FormInput, { GoogleAuthButton } from './FormInput';
 import { loginUser, setAuthSession, API_BASE_URL } from '../services/api';
+import {
+  handleGoogleCallbackParams,
+  triggerGoogleSelectAccount,
+} from '../utils/googleAuth';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -14,7 +19,9 @@ export default function Login({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [serverError, setServerError] = useState('');
+  const [googleError, setGoogleError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const [touched, setTouched] = useState({
     email: false,
@@ -57,12 +64,56 @@ export default function Login({
   };
 
   const routeByRole = (userData) => {
+    if (!userData?.token) {
+      setGoogleError(
+        'Authentication failed: missing valid session token. Please sign in again.'
+      );
+      return;
+    }
+
+    const resolvedRole = userData.role || 'user';
+    localStorage.setItem('veloreka_token', userData.token);
+    localStorage.setItem('veloreka_role', resolvedRole);
+    setAuthSession(userData.token, userData, resolvedRole);
+
     onSuccess?.(userData);
-    if (userData.role === 'admin') {
+    if (resolvedRole === 'admin') {
       navigate?.('/admin');
     } else {
       navigate?.('/home');
     }
+  };
+
+  useEffect(() => {
+    const callbackResult = handleGoogleCallbackParams();
+    if (!callbackResult || callbackResult.isPopup) return;
+
+    if (callbackResult.error) {
+      setGoogleError(callbackResult.error);
+      return;
+    }
+
+    if (callbackResult.userData?.token) {
+      routeByRole(callbackResult.userData);
+    }
+  }, []);
+
+  const handleGoogleLogin = () => {
+    setServerError('');
+    setGoogleError('');
+
+    triggerGoogleSelectAccount({
+      onLoadingChange: setIsGoogleLoading,
+      onSuccess: (userData) => {
+        routeByRole(userData);
+      },
+      onError: (message) => {
+        setGoogleError(
+          message ||
+            'Google sign-in was cancelled or failed. Please select a Google account to continue.'
+        );
+      },
+    });
   };
 
   const handleLogin = async (e) => {
@@ -210,19 +261,21 @@ export default function Login({
 
           <GoogleAuthButton
             label="Login with Google"
-            onClick={() => {
-              const guestUser = {
-                fullName: 'Veloreka Member',
-                email: email.trim() || 'VeloReka@example.com',
-                role: 'user',
-                token: `google-token-${Date.now()}`,
-              };
-              localStorage.setItem('veloreka_token', guestUser.token);
-              localStorage.setItem('veloreka_role', 'user');
-              setAuthSession(guestUser.token, guestUser, 'user');
-              routeByRole(guestUser);
-            }}
+            loading={isGoogleLoading}
+            disabled={isSubmitting}
+            loadingLabel="Opening Google Account Chooser..."
+            onClick={handleGoogleLogin}
           />
+
+          {googleError && (
+            <div
+              role="alert"
+              className="mt-3 p-3 rounded-[10px] bg-red-50 border border-red-200 flex items-start gap-2.5 text-[#ED1010] text-[13px] leading-snug"
+            >
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span>{googleError}</span>
+            </div>
+          )}
         </div>
       </div>
 

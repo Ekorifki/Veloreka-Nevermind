@@ -209,6 +209,28 @@ export async function loginUser({ email, password }) {
   return result;
 }
 
+export function getGoogleAuthRedirectUrl() {
+  const baseRedirect = buildApiUrl('/auth/google/redirect');
+  const url = new URL(baseRedirect, window.location.origin);
+  url.searchParams.set('prompt', 'select_account');
+  url.searchParams.set(
+    'frontend_redirect',
+    `${window.location.origin}/login`
+  );
+  return url.toString();
+}
+
+export async function authenticateWithGoogleApi(payload) {
+  const result = await apiRequest('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  if (result.token) {
+    setAuthSession(result.token, result.user, result.role || result.user?.role);
+  }
+  return result;
+}
+
 export async function logoutUser() {
   try {
     await apiRequest('/logout', { method: 'POST' });

@@ -190,8 +190,14 @@ export default function App() {
   };
 
   const handleAuthSuccess = (userData) => {
+    const token = userData?.token || getAuthToken();
+    if (!token) {
+      navigateRoute('/login', { replace: true });
+      return;
+    }
+
     const role = userData?.role || getStoredRole() || 'user';
-    setUser({ ...userData, role });
+    setUser({ ...userData, role, token });
     loadCartFromServer();
 
     if (role === 'admin') {
@@ -343,7 +349,7 @@ export default function App() {
     );
   }
 
-  if (pathname === '/login') {
+  if (pathname === '/login' || pathname === '/auth/google/callback') {
     return (
       <Login
         isStandalone
